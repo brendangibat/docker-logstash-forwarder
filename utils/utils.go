@@ -66,7 +66,7 @@ func RegisterDockerEventListener(client *docker.Client, function func(), wg *syn
 		}
 
 		if (event.Status == "start" || event.Status == "stop" || event.Status == "die") && !ignoreFrom.MatchString(event.From) {
-			log.Debug("Received event %s for container %s", event.Status, event.ID[:12])
+			log.Debug("Received event %s for container %s from %s", event.Status, event.ID[:12], event.From)
 
 			Refresh.Mu.Lock()
 			if !Refresh.IsTriggered {
