@@ -23,6 +23,8 @@ Besides that, how much reason do you need to play with Go & Docker? ;-)
 
 ```docker-logstash-forwarder``` listens to Docker events and continually restarts a logstash-forwarder instance, after refreshing its configuration, every ```laziness``` seconds after a new event was received (to avoid unnecessary restarts - configurable via ```-laziness``` flag - defaults to 5 seconds).
 
+logstash-forwarder will ignore containers that match a given regex passed in via the command line with -ignore-regexp-from or environment variable IGNORE_FROM_REGEXP. It defaults to [^\w\W], so in effect ignoring nothing.
+
 For every running container the docker log file is added and it is checked if a logstash-forwarder config exists within the container at ```/etc/logstash-forwarder.conf```.
 
 If an in container specific config exists, the path of all files will be expanded to be valid within the logstash-forwarder container before adding them to the global configuration.
@@ -79,10 +81,10 @@ If you start from scratch / use [Vagrant](http://www.vagrantup.com/) / are on a 
 
 1. docker-logstash-forwarder must be run as root until Docker provides configurable ownership of shared volumes, because ```/var/lib/docker``` is owned by root on the host and mounted read only, so a non root user can not read from it ([docker#7918](https://github.com/docker/docker/issues/7198)).
 
-2. The path of the containers content, on the hosts file system, has to be calculated by trying to take an educated guess based on your currently used docker driver since the docker folks consider this path internal and don't want to make it available via API ([docker#7915](https://github.com/docker/docker/issues/7915)). 
+2. The path of the containers content, on the hosts file system, has to be calculated by trying to take an educated guess based on your currently used docker driver since the docker folks consider this path internal and don't want to make it available via API ([docker#7915](https://github.com/docker/docker/issues/7915)).
 
 	Known to be working drivers are:
-	
+
 	* aufs
 	* btrfs
 	* devicemapper

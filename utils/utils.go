@@ -3,6 +3,7 @@ package utils
 
 import (
 	"os"
+	"regexp"
 	"sync"
 	"time"
 
@@ -42,6 +43,8 @@ func EndPoint(sensibleDefault string, flag string, envVar string) string {
 // RegisterDockerEventListener registers function as event listener with docker.
 // laziness defines how many seconds to wait, after an event is received, until a refresh is triggered
 func RegisterDockerEventListener(client *docker.Client, function func(), wg *sync.WaitGroup, laziness int) {
+
+	var ignoreFrom = regexp.MustCompile(EndPoint("[^\\w\\W]", "ignore-regexp-from", "IGNORE_FROM_REGEXP"))
 	wg.Add(1)
 	defer wg.Done()
 
@@ -62,7 +65,7 @@ func RegisterDockerEventListener(client *docker.Client, function func(), wg *syn
 			continue
 		}
 
-		if event.Status == "start" || event.Status == "stop" || event.Status == "die" {
+		if (event.Status == "start" || event.Status == "stop" || event.Status == "die") && !ignoreFrom.MatchString(event.From) {
 			log.Debug("Received event %s for container %s", event.Status, event.ID[:12])
 
 			Refresh.Mu.Lock()
